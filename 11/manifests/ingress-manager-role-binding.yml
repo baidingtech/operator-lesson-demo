@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  creationTimestamp: null
+  name: ingress-manager-rb
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ingress-manager-role
+subjects:
+- kind: ServiceAccount
+  name: ingress-manager-sa
+  namespace: default
