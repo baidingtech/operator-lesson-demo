@@ -1,0 +1,7 @@
+apiVersion: baiding.tech/v1
+kind: Foo
+metadata:
+  name: crd-test
+spec:
+  name: test
+  replicas: 2
