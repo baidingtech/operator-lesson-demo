@@ -1,0 +1,14 @@
+apiVersion: appcontroller.baiding.tech/v1alpha1
+kind: App
+metadata:
+  name: app-demo
+spec:
+  deployment:
+    name: app-deployment-demo
+    image: nginx:latest
+    replicas: 2
+  service:
+    name: app-service-demo
+  ingress:
+    name: app-ingress-demo
+status: {}

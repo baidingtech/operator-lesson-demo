@@ -1,0 +1,85 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: (devel)
+  creationTimestamp: null
+  name: apps.appcontroller.baiding.tech
+spec:
+  group: appcontroller.baiding.tech
+  names:
+    kind: App
+    listKind: AppList
+    plural: apps
+    singular: app
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: App is a specification for a App resource
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AppSpec is the spec for a App resource
+            properties:
+              deployment:
+                properties:
+                  image:
+                    type: string
+                  name:
+                    type: string
+                  replicas:
+                    format: int32
+                    type: integer
+                required:
+                - image
+                - name
+                - replicas
+                type: object
+              ingress:
+                properties:
+                  name:
+                    type: string
+                required:
+                - name
+                type: object
+              service:
+                properties:
+                  name:
+                    type: string
+                required:
+                - name
+                type: object
+            required:
+            - deployment
+            - ingress
+            - service
+            type: object
+          status:
+            description: AppStatus is the status for a App resource
+            type: object
+        required:
+        - spec
+        - status
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
