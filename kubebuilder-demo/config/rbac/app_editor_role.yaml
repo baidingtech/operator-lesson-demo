@@ -1,0 +1,24 @@
+# permissions for end users to edit apps.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: app-editor-role
+rules:
+- apiGroups:
+  - ingress.baiding.tech
+  resources:
+  - apps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ingress.baiding.tech
+  resources:
+  - apps/status
+  verbs:
+  - get

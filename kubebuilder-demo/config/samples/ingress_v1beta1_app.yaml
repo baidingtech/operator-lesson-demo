@@ -1,0 +1,6 @@
+apiVersion: ingress.baiding.tech/v1beta1
+kind: App
+metadata:
+  name: app-sample
+spec:
+  # TODO(user): Add fields here
