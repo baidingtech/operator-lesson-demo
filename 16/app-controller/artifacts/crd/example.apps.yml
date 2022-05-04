@@ -11,4 +11,3 @@ spec:
     name: app-service-demo
   ingress:
     name: app-ingress-demo
-status: {}

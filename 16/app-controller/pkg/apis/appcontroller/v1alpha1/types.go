@@ -29,7 +29,7 @@ type App struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   AppSpec   `json:"spec"`
-	Status AppStatus `json:"status"`
+	//Status AppStatus `json:"status"`
 }
 
 type DeploymentSpec struct {
@@ -55,8 +55,8 @@ type AppSpec struct {
 }
 
 // AppStatus is the status for a App resource
-type AppStatus struct {
-}
+//type AppStatus struct {
+//}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
