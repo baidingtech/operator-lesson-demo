@@ -13,4 +13,9 @@ resources:
   kind: App
   path: github.com/kubebuilder-demo/api/v1beta1
   version: v1beta1
+  webhooks:
+    conversion: true
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 version: "3"
