@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{.ObjectMeta.Name}}
+  namespace: {{.ObjectMeta.Namespace}}
+spec:
+  rules:
+    - host: {{.ObjectMeta.Name}}.baiding.tech
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{.ObjectMeta.Name}}
+                port:
+                  number: 8080
+  ingressClassName: traefik

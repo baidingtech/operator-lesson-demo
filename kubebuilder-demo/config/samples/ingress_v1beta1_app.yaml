@@ -3,4 +3,7 @@ kind: App
 metadata:
   name: app-sample
 spec:
-  # TODO(user): Add fields here
+  image: nginx:latest
+  replicas: 3
+  enable_ingress: false
+  enable_service: false

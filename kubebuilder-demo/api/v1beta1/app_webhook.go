@@ -29,7 +29,6 @@ var applog = logf.Log.WithName("app-resource")
 func (r *App) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(r).
-		WithDefaulter().
 		Complete()
 }
 

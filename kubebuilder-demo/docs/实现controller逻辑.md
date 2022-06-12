@@ -1,66 +1,65 @@
-/*
-Copyright 2022.
+# 使用kubebuilder实现自定义controller
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+### 需求
+![img.png](img.png)
 
-    http://www.apache.org/licenses/LICENSE-2.0
+### 生成代码
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+```shell
+kubebuilder create api --group ingress --version v1beta1 --kind App
+```
 
-package controllers
+### 修改app_types.go
 
-import (
-	"context"
-	"github.com/kubebuilder-demo/controllers/utils"
-	v1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+首先，我们需要定义好自定义的资源，我们这里指定为App，我们希望开发团队能够声明一个App
+的资源，然后由我们的自定义controller根据其配置，自动为其创建deployment、service、
+ingress等资源。
 
-	"k8s.io/apimachinery/pkg/runtime"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+定义如下：
 
-	ingressv1beta1 "github.com/kubebuilder-demo/api/v1beta1"
-)
+```yaml
+type AppSpec struct {
+  // INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+// Important: Run "make" to regenerate code after modifying this file
 
-// AppReconciler reconciles a App object
-type AppReconciler struct {
-	client.Client
-	Scheme *runtime.Scheme
+  EnableIngress bool `json:"enable_ingress,omitempty"`
+  EnableService bool `json:"enable_service"`
+  Replicas    int32  `json:"replicas"`
+  Image string	`json:"image"`
 }
+```
 
-//+kubebuilder:rbac:groups=ingress.baiding.tech,resources=apps,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=ingress.baiding.tech,resources=apps/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=ingress.baiding.tech,resources=apps/finalizers,verbs=update
+其中Image、Replicas、EnableService为必须设置的属性，EnableIngress可以为空.
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the App object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
-func (r *AppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+### 重新生成crd资源
+
+```shell
+make manifests
+```
+
+### 实现Reconcile逻辑
+
+1. App的处理
+
+```go
 	logger := log.FromContext(ctx)
 	app := &ingressv1beta1.App{}
 	//从缓存中获取app
 	if err := r.Get(ctx, req.NamespacedName, app); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+```
 
+2. Deployment的处理
+
+之前我们创建资源对象时，都是通过构造golang的struct来构造，但是对于复杂的资源对象
+这样做费时费力，所以，我们可以先将资源定义为go template，然后替换需要修改的值之后，
+反序列号为golang的struct对象，然后再通过client-go帮助我们创建或更新指定的资源。
+
+我们的deployment、service、ingress都放在了controllers/template中，通过
+utils来完成上述过程。
+
+```go
 	//根据app的配置进行处理
 	//1. Deployment的处理
 	deployment := utils.NewDeployment(app)
@@ -81,7 +80,10 @@ func (r *AppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 			return ctrl.Result{}, err
 		}
 	}
+```
 
+3. Service的处理
+```go
 	//2. Service的处理
 	service := utils.NewService(app)
 	if err := controllerutil.SetControllerReference(app, service, r.Scheme); err != nil {
@@ -108,7 +110,10 @@ func (r *AppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 
 		}
 	}
+```
 
+4. Ingress的处理
+```go
 	//3. Ingress的处理,ingress配置可能为空
 	//TODO 使用admission校验该值,如果启用了ingress，那么service必须启用
 	//TODO 使用admission设置默认值,默认为false
@@ -138,11 +143,11 @@ func (r *AppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 			}
 		}
 	}
+```
 
-	return ctrl.Result{}, nil
-}
+5. 删除service、ingress、deployment时，自动重建
 
-// SetupWithManager sets up the controller with the Manager.
+```go
 func (r *AppReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&ingressv1beta1.App{}).
@@ -151,3 +156,67 @@ func (r *AppReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.Service{}).
 		Complete(r)
 }
+```
+
+
+### 测试
+
+#### 安装ingress controller
+
+我们这里使用traefik作为ingress controller。
+
+```shell
+cat <<EOF>> traefik_values.yaml
+ingressClass:
+  enabled: true
+  isDefaultClass: true #指定为默认的ingress
+EOF
+
+helm install traefik traefik/traefik -f traefik_values.yaml 
+```
+
+#### 安装crd
+
+```shell
+make install
+```
+
+#### 部署自定义controller
+
+> 开发时可以直接在本地调试。
+
+1. 构建镜像
+```shell
+IMG=wangtaotao2015/app-controller make docker-build
+```
+2. push镜像
+```shell
+IMG=wangtaotao2015/app-controller make docker-push
+```
+
+3. 部署
+```shell
+IMG=wangtaotao2015/app-controller make deploy
+```
+
+#### 验证
+
+1. 创建一个app
+
+```shell
+kubectl apply -f config/samples
+```
+
+2. 检查是否创建了deployment
+
+3. 修改app，看service、ingress是否能被创建
+
+4. 访问ingress，看是否可以访问到服务
+
+
+### 遗留问题
+
+1. 设置enable_ingress为true
+2. 当设置enable_ingress为true时，enable_service必须设置为true
+
+我们将通过admission webhook来解决。
