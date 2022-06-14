@@ -123,7 +123,7 @@ func (r *AppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	if err := r.Get(ctx, types.NamespacedName{Name: app.Name, Namespace: app.Namespace}, i); err != nil {
 		if errors.IsNotFound(err) && app.Spec.EnableIngress {
 			if err := r.Create(ctx, ingress); err != nil {
-				logger.Error(err, "create service failed")
+				logger.Error(err, "create ingress failed")
 				return ctrl.Result{}, err
 			}
 		}
