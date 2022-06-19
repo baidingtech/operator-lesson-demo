@@ -99,11 +99,12 @@ func (r *AppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 				return ctrl.Result{}, err
 			}
 		}
+		if !errors.IsNotFound(err) && app.Spec.EnableService {
+			return ctrl.Result{}, err
+		}
 	} else {
 		if app.Spec.EnableService {
-			if err := r.Update(ctx, service); err != nil {
-				return ctrl.Result{}, err
-			}
+			logger.Info("skip update")
 		} else {
 			if err := r.Delete(ctx, s); err != nil {
 				return ctrl.Result{}, err
@@ -113,11 +114,6 @@ func (r *AppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	}
 
 	//3. Ingress的处理,ingress配置可能为空
-	//TODO 使用admission校验该值,如果启用了ingress，那么service必须启用
-	//TODO 使用admission设置默认值,默认为false
-	if !app.Spec.EnableService {
-		return ctrl.Result{}, nil
-	}
 	ingress := utils.NewIngress(app)
 	if err := controllerutil.SetControllerReference(app, ingress, r.Scheme); err != nil {
 		return ctrl.Result{}, err
@@ -129,6 +125,9 @@ func (r *AppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 				logger.Error(err, "create ingress failed")
 				return ctrl.Result{}, err
 			}
+		}
+		if !errors.IsNotFound(err) && app.Spec.EnableService {
+			return ctrl.Result{}, err
 		}
 	} else {
 		if app.Spec.EnableIngress {

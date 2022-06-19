@@ -171,32 +171,27 @@ func (r *App) ValidateCreate() error {
 	applog.Info("validate create", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object creation.
-	if !r.Spec.EnableService && r.Spec.EnableIngress {
-		return apierrors.NewInvalid(GroupVersion.WithKind("App").GroupKind(), r.Name,
-			field.ErrorList{field.Required(field.NewPath("metadata.name"), "name is required")},
-		)
-	}
-	return nil
+	return r.validateApp()
 }
+
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (r *App) ValidateUpdate(old runtime.Object) error {
 	applog.Info("validate update", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object update.
-	if !r.Spec.EnableService && r.Spec.EnableIngress {
-		return apierrors.NewInvalid(GroupVersion.WithKind("App").GroupKind(), r.Name,
-			field.ErrorList{field.Required(field.NewPath("metadata.name"), "name is required")},
-		)
-	}
-	return nil
+	return r.validateApp()
 }
 
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *App) ValidateDelete() error {
-	applog.Info("validate delete", "name", r.Name)
-
-	// TODO(user): fill in your validation logic upon object deletion.
-	//不需要做任何处理
+func (r *App) validateApp() error {
+	if !r.Spec.EnableService && r.Spec.EnableIngress {
+		return apierrors.NewInvalid(GroupVersion.WithKind("App").GroupKind(), r.Name,
+			field.ErrorList{
+				field.Invalid(field.NewPath("enable_service"),
+					r.Spec.EnableService,
+					"enable_service should be true when enable_ingress is true"),
+			},
+		)
+	}
 	return nil
 }
 ```
@@ -211,7 +206,7 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/
 2. 部署
 
 ```shell
-make deploy
+IMG=wangtaotao2015/app-controller make deploy
 ```
 
 3. 验证
@@ -285,6 +280,18 @@ kubectl get secrets webhook-server-cert -n  kubebuilder-demo-system -o jsonpath=
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
+```
+
+4. 部署
+
+```shell
+make dev
+```
+
+5. 清理环境
+
+```shell
+make undev
 ```
 
 

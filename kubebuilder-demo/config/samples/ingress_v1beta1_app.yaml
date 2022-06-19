@@ -6,4 +6,4 @@ spec:
   image: nginx:latest
   replicas: 3
   enable_service: false
-  enable_ingress: false
+  enable_ingress: true
