@@ -5,5 +5,5 @@ metadata:
 spec:
   image: nginx:latest
   replicas: 3
-  enable_service: false
-  enable_ingress: true
+  enable_ingress: false #会被修改为true
+  enable_service: true #成功

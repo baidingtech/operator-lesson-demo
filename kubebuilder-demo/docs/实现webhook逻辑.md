@@ -256,6 +256,19 @@ spec:
 
 - config/dev
 
+- Makefile
+
+```shell
+.PHONY: dev
+dev: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	$(KUSTOMIZE) build config/dev | kubectl apply -f -
+.PHONY: undev
+undev: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
+	$(KUSTOMIZE) build config/dev | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
+
+```
+
 
 2. 获取证书放到临时文件目录下
 
