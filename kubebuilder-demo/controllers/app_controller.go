@@ -126,14 +126,12 @@ func (r *AppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 				return ctrl.Result{}, err
 			}
 		}
-		if !errors.IsNotFound(err) && app.Spec.EnableService {
+		if !errors.IsNotFound(err) && app.Spec.EnableIngress {
 			return ctrl.Result{}, err
 		}
 	} else {
 		if app.Spec.EnableIngress {
-			if err := r.Update(ctx, ingress); err != nil {
-				return ctrl.Result{}, err
-			}
+			logger.Info("skip update")
 		} else {
 			if err := r.Delete(ctx, i); err != nil {
 				return ctrl.Result{}, err
