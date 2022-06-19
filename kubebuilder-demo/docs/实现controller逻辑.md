@@ -98,8 +98,10 @@ utils来完成上述过程。
 				return ctrl.Result{}, err
 			}
 		}
+		//Fix: 这里还需要修复一下
 	} else {
 		if app.Spec.EnableService {
+			//Fix: 当前情况下，不需要更新，结果始终都一样
 			if err := r.Update(ctx, service); err != nil {
 				return ctrl.Result{}, err
 			}
@@ -117,6 +119,7 @@ utils来完成上述过程。
 	//3. Ingress的处理,ingress配置可能为空
 	//TODO 使用admission校验该值,如果启用了ingress，那么service必须启用
 	//TODO 使用admission设置默认值,默认为false
+	//Fix: 这里会导致Ingress无法被删除
 	if !app.Spec.EnableService {
 		return ctrl.Result{}, nil
 	}
@@ -132,8 +135,10 @@ utils来完成上述过程。
 				return ctrl.Result{}, err
 			}
 		}
+		//Fix: 这里还是需要重试一下
 	} else {
 		if app.Spec.EnableIngress {
+            //Fix: 当前情况下，不需要更新，结果始终都一样
 			if err := r.Update(ctx, ingress); err != nil {
 				return ctrl.Result{}, err
 			}
@@ -195,6 +200,12 @@ IMG=wangtaotao2015/app-controller make docker-push
 ```
 
 3. 部署
+> fix: 部署之前需要修改一下controllers/app_controller.go的rbac
+> ```yaml
+>//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+>//+kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;watch;create;update;patch;delete
+>//+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
+> ```
 ```shell
 IMG=wangtaotao2015/app-controller make deploy
 ```
@@ -217,6 +228,7 @@ kubectl apply -f config/samples
 ### 遗留问题
 
 1. 设置enable_ingress为true
+   > 修改为由webhook将该值设置为反向值
 2. 当设置enable_ingress为true时，enable_service必须设置为true
 
 我们将通过admission webhook来解决。
