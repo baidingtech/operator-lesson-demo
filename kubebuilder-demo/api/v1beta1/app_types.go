@@ -28,6 +28,7 @@ type AppSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	//+kubebuilder:default:enable_ingress=false
 	EnableIngress bool   `json:"enable_ingress,omitempty"`
 	EnableService bool   `json:"enable_service"`
 	Replicas      int32  `json:"replicas"`

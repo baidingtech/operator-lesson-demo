@@ -37,6 +37,7 @@ spec:
             description: AppSpec defines the desired state of App
             properties:
               enable_ingress:
+                default: false
                 type: boolean
               enable_service:
                 type: boolean

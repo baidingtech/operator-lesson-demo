@@ -227,8 +227,7 @@ kubectl apply -f config/samples
 
 ### 遗留问题
 
-1. 设置enable_ingress为true
-   > 修改为由webhook将该值设置为反向值
+1. enable_ingress默认为false, webhook将该值设置为反向值
 2. 当设置enable_ingress为true时，enable_service必须设置为true
 
 我们将通过admission webhook来解决。
