@@ -1,0 +1,20 @@
+# permissions for end users to view apps.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: app-viewer-role
+rules:
+- apiGroups:
+  - ingress.baiding.tech
+  resources:
+  - apps
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ingress.baiding.tech
+  resources:
+  - apps/status
+  verbs:
+  - get

@@ -1,0 +1,6 @@
+# Use the 'create api' subcommand to add watches to this file.
+- group: ingress.baiding.tech
+  version: v1alpha1
+  kind: App
+  chart: helm-charts/app-chart
+#+kubebuilder:scaffold:watch

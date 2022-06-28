@@ -1,0 +1,19 @@
+{{- if and .Values.enable_ingress .Values.enable_service -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{.Values.name}}
+spec:
+  rules:
+    - host: {{.Values.name}}.baiding.tech
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{.Values.name}}
+                port:
+                  number: 8080
+  ingressClassName: traefik
+{{- end }}

@@ -1,0 +1,9 @@
+# Default values for app-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image: nginx:latest
+name: app-sample
+replicas: 3
+enable_ingress: true
+enable_service: true

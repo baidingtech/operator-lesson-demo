@@ -1,0 +1,13 @@
+apiVersion: ingress.baiding.tech/v1alpha1
+kind: App
+metadata:
+  name: app-sample
+spec:
+  # Default values copied from <project_dir>/helm-charts/app-chart/values.yaml
+  enable_ingress: true
+  enable_service: true
+  image: nginx:latest
+  name: app-sample
+  replicas: 3
+  
+  
