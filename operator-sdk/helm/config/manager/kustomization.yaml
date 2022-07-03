@@ -13,3 +13,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: wangtaotao2015/operator-helm-demo
+  newTag: v0.0.2

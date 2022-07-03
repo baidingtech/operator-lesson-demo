@@ -51,9 +51,11 @@ make run
 1. 构建镜像和部署到集群
 
 ```shell
-make docker-build IMG=wangtaotao2015/operator-helm-demo
-make docker-push IMG=wangtaotao2015/operator-helm-demo
-make deploy IMG=wangtaotao2015/operator-helm-demo
+make docker-build docker-push IMG=wangtaotao2015/operator-helm-demo:v0.0.1
+```
+
+```shell
+make deploy IMG=wangtaotao2015/operator-helm-demo:v0.0.1
 ```
 
 ### 其他需求
@@ -63,13 +65,43 @@ make deploy IMG=wangtaotao2015/operator-helm-demo
 
 
 ## Operator生命周期管理(OLM)
-OLM也是[operator-framework](https://github.com/operator-framework)的一个子项目，本质上就是一个Operator。只不过这个Operator是用来管理其他operator得生命周期的。
+OLM也是[operator-framework](https://github.com/operator-framework)的一个子项目，本质上就是2个Operator（olm-operator和catalog-operator）。只不过这个Operator是用来管理其他operator得生命周期的。
 
-### 参考文档
+1. 安装OLM
 
-https://sdk.operatorframework.io/docs/building-operators/helm/
-https://sdk.operatorframework.io/docs/building-operators/helm/reference/watches/
-https://helm.sh/docs/topics/charts_hooks/
+将会安装OLM对应的CRD、RBAC等资源，同时会部署olm-operator和catalog-operator两个operator。
+```shell
+operator-sdk olm install --version v0.21.2
+```
+> 卸载可以使用 operator-sdk olm uninstall --version v0.21.2
+> 查看状态使用 operator-sdk olm status
+
+2. 用OLM部署operator
+> 先将之前用make deploy的清理掉。
+> make uninstall && make undeploy
+
+- 生成operator相关配置
+```shell
+make bundle IMG=wangtaotao2015/operator-helm-demo:v0.0.1 VERSION=0.0.1
+```
+- 构建bundle镜像
+```shell
+make bundle-build bundle-push BUNDLE_IMG=wangtaotao2015/operator-helm-demo-bundle:v0.0.1
+```
+
+- OLM部署operator
+```shell
+operator-sdk run bundle docker.io/wangtaotao2015/operator-helm-demo-bundle:v0.0.1
+```
+
+- 升级operator版本
+> 修改helm的values.yaml设置enable_ingress: false,然后重新构建镜像
+```shell
+make bundle IMG=wangtaotao2015/operator-helm-demo:v0.0.2 VERSION=0.0.2
+make bundle-build bundle-push BUNDLE_IMG=wangtaotao2015/operator-helm-demo-bundle:v0.0.2
+operator-sdk run bundle-upgrade docker.io/wangtaotao2015/operator-helm-demo-bundle:v0.0.2
+```
+
 
 
 ## Operator工具对比
@@ -84,3 +116,10 @@ https://helm.sh/docs/topics/charts_hooks/
 3. [Kubernetes Operator Pythonic Framework (KOPF)](https://kopf.readthedocs.io/)
 4. [Shell-Operator](https://github.com/flant/shell-operator)
 5. [MetaController](https://github.com/metacontroller/metacontroller)
+
+## 参考文档
+
+https://sdk.operatorframework.io/docs/building-operators/helm/
+https://sdk.operatorframework.io/docs/building-operators/helm/reference/watches/
+https://helm.sh/docs/topics/charts_hooks/
+https://olm.operatorframework.io/docs/
