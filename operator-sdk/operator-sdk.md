@@ -91,7 +91,7 @@ make bundle-build bundle-push BUNDLE_IMG=wangtaotao2015/operator-helm-demo-bundl
 
 - OLM部署operator
 ```shell
-operator-sdk run bundle docker.io/wangtaotao2015/operator-helm-demo-bundle:v0.0.1
+operator-sdk run bundle docker.io/wangtaotao2015/operator-helm-demo-bundle:v0.0.1 --timeout 10m
 ```
 
 - 升级operator版本
@@ -99,7 +99,7 @@ operator-sdk run bundle docker.io/wangtaotao2015/operator-helm-demo-bundle:v0.0.
 ```shell
 make bundle IMG=wangtaotao2015/operator-helm-demo:v0.0.2 VERSION=0.0.2
 make bundle-build bundle-push BUNDLE_IMG=wangtaotao2015/operator-helm-demo-bundle:v0.0.2
-operator-sdk run bundle-upgrade docker.io/wangtaotao2015/operator-helm-demo-bundle:v0.0.2
+operator-sdk run bundle-upgrade docker.io/wangtaotao2015/operator-helm-demo-bundle:v0.0.2 --timeout 10m
 ```
 
 
