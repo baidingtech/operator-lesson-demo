@@ -60,9 +60,11 @@ make deploy IMG=wangtaotao2015/operator-helm-demo:v0.0.1
 
 ### 其他需求
 1. 删除helm里面的资源后如何重建?
-2. helm里面的默认值如何覆盖?
-3. 如何校验自定义资源?
-
+  本身已经支持了。
+3. helm里面的默认值如何覆盖?
+  olm小节中讲解了。
+5. 如何校验自定义资源?
+  用helm的hooks功能实现。
 
 ## Operator生命周期管理(OLM)
 OLM也是[operator-framework](https://github.com/operator-framework)的一个子项目，本质上就是2个Operator（olm-operator和catalog-operator）。只不过这个Operator是用来管理其他operator得生命周期的。
@@ -120,6 +122,9 @@ operator-sdk run bundle-upgrade docker.io/wangtaotao2015/operator-helm-demo-bund
 ## 参考文档
 
 https://sdk.operatorframework.io/docs/building-operators/helm/
+
 https://sdk.operatorframework.io/docs/building-operators/helm/reference/watches/
+
 https://helm.sh/docs/topics/charts_hooks/
+
 https://olm.operatorframework.io/docs/
