@@ -60,10 +60,15 @@ make deploy IMG=wangtaotao2015/operator-helm-demo:v0.0.1
 
 ### 其他需求
 1. 删除helm里面的资源后如何重建?
+
   本身已经支持了。
-3. helm里面的默认值如何覆盖?
+  
+2. helm里面的默认值如何覆盖?
+
   olm小节中讲解了。
-5. 如何校验自定义资源?
+  
+3. 如何校验自定义资源?
+ 
   用helm的hooks功能实现。
 
 ## Operator生命周期管理(OLM)
