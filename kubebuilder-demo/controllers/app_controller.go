@@ -80,6 +80,14 @@ func (r *AppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 			}
 		}
 	} else {
+		//Bug: 这里会反复触发更新
+		//原因：在148行SetupWithManager方法中，监听了Deployment，所以只要更新Deployment就会触发
+		//     此处更新和controllerManager更新Deployment都会触发更新事件，导致循环触发
+		//修复方法：
+		//1. 注释掉在148行SetupWithManager方法中对Deployment，Ingress，Service等的监听，该处的处理只是为了
+		//   手动删除Deployment等后能够自动重建，但正常不会出现这种情况，是否需要根据情况而定
+		//2. 加上判断条件，仅在app.Spec.Replicas != deployment.Spec.Replicas &&
+		//   app.Spec.Image != deployment.Spec.Template.Spec.Containers[0].Image时才更新deployment
 		if err := r.Update(ctx, deployment); err != nil {
 			return ctrl.Result{}, err
 		}
